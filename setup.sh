@@ -78,7 +78,7 @@ echo -e "${BLUE}[5/5] Configuring UFW firewall (ports 22, 80, 443)...${NC}"
 ufw default deny incoming
 ufw default allow outgoing
 ufw allow 22/tcp comment 'SSH'
-ufw allow 80/tcp comment 'HTTP (Caddy Let\'s Encrypt Challenge)'
+ufw allow 80/tcp comment "HTTP (Caddy Let's Encrypt Challenge)"
 ufw allow 443/tcp comment 'HTTPS (Caddy)'
 ufw --force enable
 
