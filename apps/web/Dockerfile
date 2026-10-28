@@ -10,6 +10,8 @@ RUN npm install
 COPY packages/core ./packages/core
 COPY apps/web ./apps/web
 
+RUN mkdir -p /app/apps/web/public
+
 RUN npm run --workspace=packages/core build
 RUN npm run --workspace=apps/web build
 
