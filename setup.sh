@@ -28,8 +28,8 @@ apt-get install -y curl wget git ufw ca-certificates gnupg lsb-release htop fail
 
 # 2. Add 2GB Swap Memory (prevents OOM during Next.js/Fastify multi-stage builds)
 if [ ! -f /swapfile ]; then
-    echo -e "${BLUE}[2/5] Setting up 2GB swap space...${NC}"
-    fallocate -l 2G /swapfile
+    echo -e "${BLUE}[2/5] Setting up 4GB swap space...${NC}"
+    fallocate -l 4G /swapfile
     chmod 600 /swapfile
     mkswap /swapfile
     swapon /swapfile
