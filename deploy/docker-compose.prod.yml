@@ -1,0 +1,124 @@
+version: '3.8'
+
+services:
+  # Caddy Reverse Proxy with Automatic Let's Encrypt TLS & Custom Tracking Domain (CTD)
+  caddy:
+    image: caddy:2-alpine
+    container_name: pds_caddy
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    networks:
+      - pds_network
+    depends_on:
+      - api
+      - web
+
+  # PostgreSQL 16 Relational Storage
+  postgres:
+    image: postgres:16-alpine
+    container_name: pds_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-pds_db}
+      POSTGRES_USER: ${POSTGRES_USER:-pds_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-pds_secret}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    networks:
+      - pds_network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-pds_user} -d ${POSTGRES_DB:-pds_db}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Valkey / Redis Queue & Cache (Under 25MB RAM Footprint)
+  valkey:
+    image: valkey/valkey:7-alpine
+    container_name: pds_valkey
+    restart: unless-stopped
+    command: valkey-server --maxmemory 128mb --maxmemory-policy allkeys-lru --save ""
+    volumes:
+      - valkey_data:/data
+    networks:
+      - pds_network
+    healthcheck:
+      test: ["CMD", "valkey-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Fastify API Server & Ingestion Endpoints
+  api:
+    build:
+      context: ../
+      dockerfile: apps/api/Dockerfile
+    container_name: pds_api
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      PORT: 4000
+      DATABASE_URL: postgres://${POSTGRES_USER:-pds_user}:${POSTGRES_PASSWORD:-pds_secret}@postgres:5432/${POSTGRES_DB:-pds_db}
+      REDIS_URL: redis://valkey:6379
+      MASTER_ENCRYPTION_KEY: ${MASTER_ENCRYPTION_KEY}
+      JWT_SECRET: ${JWT_SECRET}
+    networks:
+      - pds_network
+    depends_on:
+      postgres:
+        condition: service_healthy
+      valkey:
+        condition: service_healthy
+
+  # BullMQ Background Workers (Dispatcher, Jitter Engine, IMAP Sync, Scraper)
+  worker:
+    build:
+      context: ../
+      dockerfile: apps/api/Dockerfile
+    container_name: pds_worker
+    restart: unless-stopped
+    command: node dist/workers/index.js
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: postgres://${POSTGRES_USER:-pds_user}:${POSTGRES_PASSWORD:-pds_secret}@postgres:5432/${POSTGRES_DB:-pds_db}
+      REDIS_URL: redis://valkey:6379
+      MASTER_ENCRYPTION_KEY: ${MASTER_ENCRYPTION_KEY}
+    networks:
+      - pds_network
+    depends_on:
+      postgres:
+        condition: service_healthy
+      valkey:
+        condition: service_healthy
+
+  # Next.js 15 Web Application
+  web:
+    build:
+      context: ../
+      dockerfile: apps/web/Dockerfile
+    container_name: pds_web
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      NEXT_PUBLIC_API_URL: https://${APP_DOMAIN:-localhost}/api
+    networks:
+      - pds_network
+    depends_on:
+      - api
+
+volumes:
+  pgdata:
+  valkey_data:
+  caddy_data:
+  caddy_config:
+
+networks:
+  pds_network:
+    driver: bridge

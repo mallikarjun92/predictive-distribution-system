@@ -1,0 +1,43 @@
+# Global Options: Enable On-Demand TLS for Custom Tracking Domains (CTD)
+{
+    email {$ACME_EMAIL:admin@example.com}
+    on_demand_tls {
+        ask http://api:4000/api/v1/domains/verify-ctd
+    }
+}
+
+# Main Application & API Domain
+{$APP_DOMAIN:localhost} {
+    encode gzip zstd
+
+    # Route /api/* to Fastify Backend
+    handle /api/* {
+        reverse_proxy api:4000
+    }
+
+    # Route Tracking Pixels & Links
+    handle /t/* {
+        reverse_proxy api:4000
+    }
+
+    # Route All Other Requests to Next.js Web App
+    handle {
+        reverse_proxy web:3000
+    }
+}
+
+# On-Demand Custom Tracking Domain Listener (CNAME)
+# e.g., track.yourclientagency.com -> resolves here with instant auto-SSL
+:443 {
+    tls {
+        on_demand
+    }
+
+    handle /t/* {
+        reverse_proxy api:4000
+    }
+
+    handle {
+        respond "Tracking Domain Active" 200
+    }
+}

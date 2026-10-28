@@ -1,0 +1,20 @@
+{
+  "name": "predictive-distribution-system",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "build": "npm run --workspaces --if-present build",
+    "test": "npm run --workspaces --if-present test",
+    "lint": "npm run --workspaces --if-present lint",
+    "dev:api": "npm run --workspace=apps/api dev",
+    "dev:web": "npm run --workspace=apps/web dev"
+  },
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
+  "devDependencies": {
+    "typescript": "^5.6.3",
+    "prettier": "^3.3.3"
+  }
+}
