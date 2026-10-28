@@ -5,6 +5,7 @@ import { trackingRoutes } from './routes/tracking.js';
 import { scraperRoutes } from './routes/scrapers.js';
 import { inboxRoutes } from './routes/inboxes.js';
 import { campaignRoutes } from './routes/campaigns.js';
+import { settingsRoutes } from './routes/settings.js';
 
 export async function buildApp() {
   const fastify = Fastify({
@@ -23,6 +24,7 @@ export async function buildApp() {
   await fastify.register(scraperRoutes);
   await fastify.register(inboxRoutes);
   await fastify.register(campaignRoutes);
+  await fastify.register(settingsRoutes);
 
   return fastify;
 }

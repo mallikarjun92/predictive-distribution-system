@@ -24,6 +24,7 @@ The **DINZIN Predictive Distribution System** is an enterprise-grade distributio
   - **Tier 2**: Guardrailed autonomous dispatch with dynamic personalization (DeepSeek, OpenAI, Anthropic, Groq).
 - **Anti-Spam Deliverability & Jitter**: Randomized delay calculation, active weekday/time sending windows, and daily inbox sending thresholds.
 - **Lead Enrichment & Scraping Engine**: Asynchronous lead generation pipeline integrating Google Maps, Apify, and custom crawlers.
+- **Super Admin Settings & Dynamic .env Vault**: Zero-downtime credential management in the UI. Super admins can update, live-test, and synchronize `GOOGLE_MAPS_API_KEY`, `APIFY_TOKEN`, AI BYOK keys, and system variables at runtime with AES-256-GCM encryption.
 - **Custom Tracking Domains (CTD)**: Caddy On-Demand TLS with automatic Let's Encrypt certificate issuance for open/click tracking endpoints.
 - **AES-256-GCM Secret Vault**: Cryptographic encryption at rest for all SMTP credentials, IMAP access tokens, and API secrets.
 - **Asynchronous Task Architecture**: Distributed BullMQ workers backed by Valkey (low-memory Redis-compatible key-value store).

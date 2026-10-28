@@ -15,7 +15,9 @@ import {
   Flame,
   Bot,
   Users,
+  Key,
 } from 'lucide-react';
+import SuperAdminSettingsModal from './components/SuperAdminSettingsModal';
 
 export default function Dashboard() {
   const [autonomyTier, setAutonomyTier] = useState<0 | 1 | 2>(1);
@@ -25,6 +27,7 @@ export default function Dashboard() {
   const [extractEmails, setExtractEmails] = useState(true);
   const [isScraping, setIsScraping] = useState(false);
   const [scrapeSuccess, setScrapeSuccess] = useState(false);
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
   const handleTriggerScrape = () => {
     setIsScraping(true);
@@ -52,14 +55,20 @@ export default function Dashboard() {
             </span>
           </div>
         </div>
-        <div className="flex items-center space-x-4 text-sm text-slate-400">
+        <div className="flex items-center space-x-3 text-sm text-slate-400">
           <div className="flex items-center space-x-2 bg-slate-900 border border-slate-800 rounded-lg px-3 py-1.5">
             <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
             <span className="text-xs text-slate-300">Caddy CTD Active</span>
           </div>
-          <div className="text-xs px-3 py-1.5 rounded-lg bg-slate-900 border border-slate-800 text-slate-300 font-mono">
-            Host: $12/mo VPS (RAM: 312MB)
-          </div>
+
+          <button
+            type="button"
+            onClick={() => setIsSettingsOpen(true)}
+            className="flex items-center space-x-2 bg-gradient-to-r from-amber-500/10 to-yellow-500/10 border border-amber-500/30 hover:border-amber-400/50 text-amber-300 hover:text-amber-200 rounded-lg px-3 py-1.5 text-xs font-semibold transition shadow-sm"
+          >
+            <Key className="w-3.5 h-3.5 text-amber-400" />
+            <span>Super Admin Settings</span>
+          </button>
         </div>
       </header>
 
@@ -206,9 +215,19 @@ export default function Dashboard() {
                   </p>
                 </div>
               </div>
-              <span className="text-xs px-2 py-1 rounded bg-slate-800 text-slate-300 font-mono">
-                Zero Email-Finder Fees
-              </span>
+              <div className="flex items-center space-x-2">
+                <button
+                  type="button"
+                  onClick={() => setIsSettingsOpen(true)}
+                  className="text-xs px-2.5 py-1 rounded-lg bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 font-medium flex items-center space-x-1.5 transition border border-amber-500/20"
+                >
+                  <Key className="w-3 h-3 text-amber-400" />
+                  <span>Manage Scraper Keys</span>
+                </button>
+                <span className="text-xs px-2 py-1 rounded bg-slate-800 text-slate-300 font-mono hidden sm:inline">
+                  Zero Email-Finder Fees
+                </span>
+              </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -332,6 +351,12 @@ export default function Dashboard() {
           </div>
         </div>
       </main>
+
+      {/* Super Admin Settings Modal */}
+      <SuperAdminSettingsModal
+        isOpen={isSettingsOpen}
+        onClose={() => setIsSettingsOpen(false)}
+      />
     </div>
   );
 }

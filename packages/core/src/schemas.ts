@@ -70,3 +70,37 @@ export const CreateCampaignSchema = z.object({
   }).default({}),
 });
 export type CreateCampaignInput = z.infer<typeof CreateCampaignSchema>;
+
+// Setting Category
+export const SettingCategorySchema = z.enum([
+  'SCRAPERS',
+  'AI_KEYS',
+  'GENERAL',
+  'INFRASTRUCTURE',
+  'SECURITY',
+]);
+export type SettingCategory = z.infer<typeof SettingCategorySchema>;
+
+// System Setting Item Schema
+export const SystemSettingItemSchema = z.object({
+  key: z.string(),
+  value: z.string(),
+  category: SettingCategorySchema,
+  isSecret: z.boolean().default(false),
+  description: z.string().optional(),
+  isConfigured: z.boolean().optional(),
+});
+export type SystemSettingItem = z.infer<typeof SystemSettingItemSchema>;
+
+// Update Settings Input Schema
+export const UpdateSettingsInputSchema = z.object({
+  settings: z.record(z.string(), z.string()),
+});
+export type UpdateSettingsInput = z.infer<typeof UpdateSettingsInputSchema>;
+
+// Test Key Input Schema
+export const TestApiKeyInputSchema = z.object({
+  provider: z.enum(['GOOGLE_MAPS', 'APIFY', 'OPENAI', 'DEEPSEEK']),
+  apiKey: z.string().min(1),
+});
+export type TestApiKeyInput = z.infer<typeof TestApiKeyInputSchema>;

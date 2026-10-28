@@ -1,6 +1,7 @@
 import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
 import { CreateScrapeJobSchema } from '@app/core';
 import { executeScrapeJob } from '../services/scraper-adapter.js';
+import { getSetting } from '../services/settings-service.js';
 
 export async function scraperRoutes(fastify: FastifyInstance) {
   // Trigger a new lead scrape job
@@ -19,6 +20,10 @@ export async function scraperRoutes(fastify: FastifyInstance) {
 
     const { provider, query, location, maxResults, extractEmails } = parseResult.data;
 
+    // Retrieve active keys from Super Admin settings / DB / process.env
+    const googleMapsApiKey = (await getSetting('GOOGLE_MAPS_API_KEY')) || process.env.GOOGLE_MAPS_API_KEY;
+    const apifyToken = (await getSetting('APIFY_TOKEN')) || process.env.APIFY_TOKEN;
+
     // In background worker this runs asynchronously via BullMQ.
     // For synchronous preview or immediate small batches:
     try {
@@ -27,8 +32,8 @@ export async function scraperRoutes(fastify: FastifyInstance) {
         location,
         maxResults,
         extractEmails,
-        googleMapsApiKey: process.env.GOOGLE_MAPS_API_KEY,
-        apifyToken: process.env.APIFY_TOKEN,
+        googleMapsApiKey,
+        apifyToken,
       });
 
       return reply.code(201).send({
