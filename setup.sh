@@ -78,15 +78,18 @@ echo -e "${BLUE}[5/5] Configuring UFW firewall (ports 22, 80, 443)...${NC}"
 ufw default deny incoming
 ufw default allow outgoing
 ufw allow 22/tcp comment 'SSH'
-ufw allow 80/tcp comment "HTTP (Caddy Let's Encrypt Challenge)"
-ufw allow 443/tcp comment 'HTTPS (Caddy)'
+ufw allow 80/tcp comment 'HTTP'
+ufw allow 443/tcp comment 'HTTPS'
 ufw --force enable
 
-# 6. Add non-root user to docker group if running under sudo
-SUDO_USER_NAME="${SUDO_USER:-}"
-if [ -n "$SUDO_USER_NAME" ] && [ "$SUDO_USER_NAME" != "root" ]; then
-    usermod -aG docker "$SUDO_USER_NAME"
-    echo -e "${GREEN}✔ Added ${SUDO_USER_NAME} to the docker group.${NC}"
+# 6. Add non-root user to docker group
+TARGET_USER="${SUDO_USER:-}"
+if [ -z "$TARGET_USER" ] || [ "$TARGET_USER" = "root" ]; then
+    TARGET_USER=$(ls -1 /home 2>/dev/null | head -n 1 || true)
+fi
+if [ -n "$TARGET_USER" ] && id "$TARGET_USER" &>/dev/null; then
+    usermod -aG docker "$TARGET_USER"
+    echo -e "${GREEN}✔ Added ${TARGET_USER} to the docker group.${NC}"
 fi
 
 echo -e "\n${GREEN}======================================================"
